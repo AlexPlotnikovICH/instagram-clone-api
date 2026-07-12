@@ -8,29 +8,29 @@ import Notification from './models/notificationModel.js'
 
 const seedDatabase = async () => {
   try {
-    // 1. Подключение
+    // 1. Connection
     await mongoose.connect(process.env.MONGO_URI)
-    console.log('🚀 База на связи. Начинаем зачистку...')
+    console.log('🚀 Database connected. Starting cleanup...')
 
-    // 2. Очистка старых данных
+    // 2. Clear old data
     await User.deleteMany({})
     await Post.deleteMany({})
     await Follow.deleteMany({})
     await Notification.deleteMany({})
-    console.log('🧹 Коллекции очищены.')
+    console.log('🧹 Collections cleared successfully.')
 
-    // 3. Хеширование пароля для всех
+    // 3. Password hashing
     const salt = await bcrypt.genSalt(10)
     const commonPassword = await bcrypt.hash('123456', salt)
 
-    // 4. Создание эталонных юзеров
+    // 4. Create reference users
     const users = await User.insertMany([
       {
         fullname: 'Clean Coder',
         username: 'clean_coder',
         email: 'coder@test.com',
         password: commonPassword,
-        bio: 'Пишу код, который не пахнет.',
+        bio: 'Writing code that breathes, not smells. 💻✨',
         profile_image: 'https://i.pravatar.cc/150?u=coder',
       },
       {
@@ -38,38 +38,32 @@ const seedDatabase = async () => {
         username: 'guru_design',
         email: 'guru@test.com',
         password: commonPassword,
-        bio: 'Делаю красиво там, где было криво.',
+        bio: 'Turning chaotic wireframes into pixel-perfect reality. 🎨📐',
         profile_image: 'https://i.pravatar.cc/150?u=design',
       },
       {
-        fullname: 'Bugs Hunter',
+        fullname: 'Bug Hunter',
         username: 'tester_pro',
         email: 'test@test.com',
         password: commonPassword,
-        bio: 'Найду ошибку даже в Hello World.',
+        bio: 'I can find a critical bug even in a basic Hello World. 🐛🔍',
         profile_image: 'https://i.pravatar.cc/150?u=test',
       },
     ])
-    console.log('👤 Юзеры созданы.')
+    console.log('👤 Users seeded successfully.')
 
-    // 5. Создание постов с привязкой к юзерам 10+
+    // 5. Create posts linked to users (10 posts)
     const postData = [
-      { cap: 'Код — это поэзия. Иногда — матерная.', img: 'tech' },
-      { cap: 'Вид из окна моего WSL терминала.', img: 'nature' },
-      {
-        cap: 'Дизайн — это не то, как вещь выглядит, а то, как она работает.',
-        img: 'architecture',
-      },
-      { cap: 'Баги — это просто недокументированные фичи.', img: 'animals' },
-      { cap: 'Кофе превращается в код. Магия!', img: 'cafe' },
-      {
-        cap: 'Мой Acer Predator тянет даже самые тяжелые запросы.',
-        img: 'work',
-      },
-      { cap: 'Когда фронтенд и бэкенд наконец-то подружились.', img: 'people' },
-      { cap: 'Вечерний деплой — залог бессонной ночи.', img: 'city' },
-      { cap: 'Zustand — это спасение для стейта.', img: 'abstract' },
-      { cap: 'Готовлю клон инсты. Марк, подвинься!', img: 'nightlife' },
+      { cap: 'Code is poetry. Sometimes, it just needs a little debugging. ☕ #coding #devlife', img: 'tech' },
+      { cap: 'The view right outside my WSL terminal window today. 🌲 #wsl #linux #setup', img: 'nature' },
+      { cap: 'Design is not just what it looks like and feels like. Design is how it works. 💡 #uiux #webdesign', img: 'architecture' },
+      { cap: 'Remember: It’s not a bug, it’s an undocumented feature. 😉 #programming #developer', img: 'animals' },
+      { cap: 'Converting premium coffee into production code. Pure magic! ☕⚡ #softwareengineer #coffee', img: 'cafe' },
+      { cap: 'My Acer Predator handles even the heaviest database queries like a charm. 🔥 #gamingpc #workstation', img: 'work' },
+      { cap: 'That rare, beautiful moment when frontend and backend finally align. 🤝 #fullstack #webdev', img: 'people' },
+      { cap: 'Friday evening deploy — a guaranteed recipe for an all-nighter. 🏙️ #devops #sysadmin', img: 'city' },
+      { cap: 'Zustand is an absolute lifesaver for global state management. 🧠 #reactjs #javascript', img: 'abstract' },
+      { cap: 'Building an Instagram clone. Watch out, Mark! 🚀 #buildinpublic #indiehackers', img: 'nightlife' },
     ]
 
     const posts = postData.map((item, index) => ({
@@ -81,13 +75,13 @@ const seedDatabase = async () => {
     }))
 
     await Post.insertMany(posts)
-    console.log(`🖼 Создано ${posts.length} постов для разных пользователей.`)
+    console.log(`🖼️ Created ${posts.length} posts for various users.`)
 
-    console.log('✅ Стейджинг базы завершен успешно!')
+    console.log('✅ Database staging completed successfully!')
     await mongoose.connection.close()
     process.exit(0)
   } catch (error) {
-    console.error('❌ Ошибка сидинга:', error)
+    console.error('❌ Seeding error occurred:', error)
     process.exit(1)
   }
 }

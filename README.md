@@ -1,55 +1,55 @@
-ICHGRAM - Backend API
-Бэкенд для социальной сети (Stack: Node.js, Express, MongoDB).
-🚀 Быстрый старт
+# ICHGRAM - Backend API
+Backend for the social network (Stack: Node.js, Express, MongoDB).
 
-Установка зависимостей
-Убедитесь, что у вас установлен Node.js, затем выполните:
+🌍 Read this in: [Deutsch](README.de.md) | [Русский](README.ru.md)
+
+## 🚀 Quick Start
+
+1. Installing Dependencies
+Make sure you have Node.js installed, then run:
 
 npm install
 
-2. Настройка окружения
-   Создайте файл .env в корне проекта и добавьте следующие переменные (настройте под свою локальную БД):
+2. Environment Configuration
+Create a .env file in the project root and add the following variables (configure them for your local DB):
 
 PORT=3333
 MONGO_URI=mongodb://127.0.0.1:27017/ichgram
-JWT_SECRET=super_secret_ichgram_key_2026 3. Наполнение базы данных (Seeding)
+JWT_SECRET=super_secret_ichgram_key_2026
 
-Чтобы не тестировать на пустом интерфейсе, запустите скрипт первичного наполнения. Внимание: Скрипт полностью очищает текущие коллекции и создает эталонные данные.
+3. Database Seeding
+To avoid testing with an empty interface, run the initial seeding script.
+Warning: The script completely clears current collections and creates reference data.
 
 node seed.js
 
-Результат:
+Result:
+3 test users created (password for all: 123456):
+User 1: coder@test.com
+User 2: guru@test.com
+User 3: test@test.com
+10+ posts generated with random images and texts.
 
-Создано 3 тестовых пользователя (пароль у всех: 123456).
-Вариант 1: * Email: coder@test.com
+4. Running the Server
 
-Пароль: 123456
-
-Вариант 2: * Email: guru@test.com
-
-Пароль: 123456
-
-Вариант 3: * Email: test@test.com
-
-Пароль: 123456
-Сгенерировано 10+ постов со случайными изображениями и текстами. 4. Запуск сервера
 npm run dev
 
-Локальный адрес сервера: http://localhost:3333
+Local server URL: http://localhost:3333
 
-🛠 Технологический стек
+🛠 Tech Stack
 Runtime: Node.js (v18+)
 Framework: Express.js
 Database: MongoDB + Mongoose
-Auth: JWT (JSON Web Tokens) + bcrypt
-Images: Multer (обработка FormData и хранение в Base64)
+Auth: JWT (JSON Web Tokens) + bcryptjs
+Images: Multer (FormData processing and Base64 storage)
 
-📖 API Документация
-Подробное описание всех эндпоинтов, форматов запросов и ответов находится в файле API_CONTRACT.md.
-📌 Ключевые эндпоинты для проверки:
-POST /api/auth/register — Регистрация нового аккаунта.
-POST /api/auth/login — Вход (поддерживает email или username).
-GET /api/users/profile — Получение данных текущего пользователя.
-PUT /api/users/profile — Обновление аватара и био (принимает FormData).
-GET /api/posts — Получение общей ленты постов.
-POST /api/posts — Создание нового поста с изображением.
+📖 API Documentation
+A detailed description of all endpoints, request and response formats can be found in the API_CONTRACT.md file.
+
+📌 Key endpoints for testing:
+POST /api/auth/register — New account registration.
+POST /api/auth/login — Login (supports email or username).
+GET /api/users/profile — Get current user data.
+PUT /api/users/profile — Update avatar and bio (accepts FormData).
+GET /api/posts — Get the main post feed.
+POST /api/posts — Create a new post with an image.
