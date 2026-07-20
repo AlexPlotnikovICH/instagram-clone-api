@@ -3,7 +3,7 @@ import Groq from 'groq-sdk'
 
 const router = Router()
 
-// Инициализация Groq SDK
+// Groq SDK
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY
 })
@@ -12,20 +12,19 @@ router.post('/chat', async (req, res) => {
   try {
     const { message } = req.body
 
-    // Валидация входящих данных
     if (!message) {
       return res.status(400).json({ error: 'Поле message обязательно для заполнения' })
     }
 
     console.log('1. Отправляем запрос к Groq...')
 
-    // Запрос к API Groq
+    // API Groq
     const chatCompletion = await groq.chat.completions.create({
       messages: [
         {
-          role: 'system',
-          content: 'Ты — Ichgram AI Business Assistant, эксперт по SMM, копирайтингу и клиентскому сервису в Instagram. Твоя цель — помогать бизнесу расти. Отвечай структурированно, лаконично, используй списки и подходящие эмодзи. Форматируй текст в Markdown.'
-        },
+          role: "system",
+  content: "You are 'Ichgram AI Business Assistant', an expert in SMM, copywriting, and customer service for Instagram. CRITICAL RULE: You must always respond in the exact same language as the user's input. If the user writes in German, reply in German. If Russian, reply in Russian. Keep responses structured, concise, and use relevant emojis. Format your output using Markdown."
+},
         {
           role: 'user',
           content: message
