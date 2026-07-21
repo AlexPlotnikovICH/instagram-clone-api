@@ -22,7 +22,7 @@ export const searchUsers = async (req, res) => {
     res.json(users)
   } catch (error) {
     console.error('Search error:', error)
-    res.status(500).json({ message: 'Ошибка при поиске пользователей' })
+    res.status(500).json({ message: 'Error searching for users' })
   }
 }
 
@@ -34,12 +34,12 @@ export const followUser = async (req, res) => {
     if (targetUserId === currentUserId.toString()) {
       return res
         .status(400)
-        .json({ message: 'Нельзя подписаться на самого себя' })
+        .json({ message: 'You cannot follow yourself' })
     }
 
     const targetUser = await User.findById(targetUserId)
     if (!targetUser) {
-      return res.status(404).json({ message: 'Пользователь не найден' })
+      return res.status(404).json({ message: 'User not found' })
     }
 
     await Follow.create({
@@ -52,15 +52,15 @@ export const followUser = async (req, res) => {
       type: 'follow',
     })
 
-    res.status(201).json({ message: 'Вы успешно подписались' })
+    res.status(201).json({ message: 'Successfully followed user' })
   } catch (error) {
     if (error.code === 11000) {
       return res
         .status(400)
-        .json({ message: 'Вы уже подписаны на этого пользователя' })
+        .json({ message: 'You are already following this user' })
     }
     console.error(error)
-    res.status(500).json({ message: 'Ошибка сервера при подписке' })
+    res.status(500).json({ message: 'Server error during follow operation' })
   }
 }
 
@@ -75,9 +75,7 @@ export const unfollowUser = async (req, res) => {
     })
 
     if (!deletedFollow) {
-      return res
-        .status(400)
-        .json({ message: 'Вы не подписаны на этого пользователя' })
+      return res.status(400).json({ message: 'You are not following this user' })
     }
 
     await Notification.findOneAndDelete({
@@ -86,14 +84,12 @@ export const unfollowUser = async (req, res) => {
       type: 'follow',
     })
 
-    res.json({ message: 'Вы успешно отписались' })
+    res.json({ message: 'Successfully unfollowed user' })
   } catch (error) {
     console.error(error)
-    res.status(500).json({ message: 'Ошибка сервера при отписке' })
+    res.status(500).json({ message: 'Server error during unfollow operation' })
   }
 }
-
-// --- ПЕРЕСАЖЕННЫЕ ФУНКЦИИ ПРОФИЛЯ ---
 
 export const getUserProfile = async (req, res) => {
   if (req.user) {
@@ -106,7 +102,7 @@ export const getUserProfile = async (req, res) => {
       bio: req.user.bio,
     })
   } else {
-    res.status(404).json({ message: 'Пользователь не найден' })
+    res.status(404).json({ message: 'User not found' })
   }
 }
 
@@ -137,35 +133,34 @@ export const updateProfile = async (req, res) => {
         profile_image: updatedUser.profile_image,
       })
     } else {
-      res.status(404).json({ message: 'Пользователь не найден' })
+      res.status(404).json({ message: 'User not found' })
     }
   } catch (error) {
     console.error(error)
-    res.status(500).json({ message: 'Ошибка при обновлении профиля' })
+    res.status(500).json({ message: 'Error updating profile' })
   }
 }
-// Получение публичного профиля любого пользователя по username
+// Get public profile of any user by username
 export const getPublicProfile = async (req, res) => {
   try {
     const { username } = req.params
 
-    // 1. Ищем пользователя
+    // 1. Find the user
     const user = await User.findOne({ username }).select('-password')
     if (!user) {
-      return res.status(404).json({ message: 'Пользователь не найден' })
+      return res.status(404).json({ message: 'User not found' })
     }
 
-    // 2. Считаем сколько у него подписчиков и на кого он подписан
+    // 2. Count followers and following
     const followersCount = await Follow.countDocuments({ following: user._id })
     const followingCount = await Follow.countDocuments({ follower: user._id })
 
-    // 3. Проверяем, подписан ли ТЕКУЩИЙ пользователь на этого чела
+    // 3. Check if the current user is following this user
     const isFollowing = await Follow.findOne({
       follower: req.user._id,
       following: user._id,
     })
 
-    // Собираем всё в один ответ
     res.json({
       ...user._doc,
       followersCount,
@@ -174,6 +169,6 @@ export const getPublicProfile = async (req, res) => {
     })
   } catch (error) {
     console.error(error)
-    res.status(500).json({ message: 'Ошибка сервера при получении профиля' })
+    res.status(500).json({ message: 'Server error while fetching profile' })
   }
 }

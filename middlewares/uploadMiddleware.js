@@ -1,22 +1,20 @@
 import multer from 'multer'
 
-//  Настраиваем хранилище
+// Configure storage
 const storage = multer.memoryStorage()
 
-//  фильтр картинки
+// Image filter
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith('image/')) {
     cb(null, true)
   } else {
-    cb(new Error('Разрешены только изображения!'), false)
+    cb(new Error('Only images are allowed!'), false)
   }
 }
 
-//  Собираем всё вместе и ставим лимит в 5 Мегабайт
+// Combine everything and set a 5 MB limit
 export const upload = multer({
   storage: storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5 MB
-  },
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
   fileFilter: fileFilter,
 })

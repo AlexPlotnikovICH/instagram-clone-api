@@ -12,18 +12,18 @@ import { upload } from '../middlewares/uploadMiddleware.js'
 
 const router = express.Router()
 
-// 1. Статические маршруты профиля
+// Profile routes
 router.get('/profile', protect, getUserProfile)
 router.put('/profile', protect, upload.single('profile_image'), updateProfile)
 
-// 2. Маршрут для поиска
+// Search route
 router.get('/search', protect, searchUsers)
 
-// 3. Маршруты подписок
+// Follow/unfollow routes
 router.post('/follow/:id', protect, followUser)
 router.post('/unfollow/:id', protect, unfollowUser)
 
-// 4. Динамический маршрут
+// Dynamic route for public profile
 router.get('/:username', protect, getPublicProfile)
 
 export default router

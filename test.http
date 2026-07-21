@@ -2,5 +2,5 @@ POST http://127.0.0.1:3333/api/ai/chat
 Content-Type: application/json
 
 {
-  "message": "напиши какую модел ты используешь."
+  "message": "Tell me which model you are using."
 }

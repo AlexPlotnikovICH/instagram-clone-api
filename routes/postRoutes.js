@@ -14,27 +14,27 @@ import { upload } from '../middlewares/uploadMiddleware.js'
 
 const router = express.Router()
 
-// Специфичные маршруты ставим выше
+// Specific routes should be placed higher
 router.get('/explore', protect, getExplorePosts)
 
-// Маршрут для получения постов конкретного юзера (для страницы Profile)
+// Route to get posts for a specific user (for the Profile page)
 router.get('/user/:userId', getUserPosts)
 
-// Марш. для получения всех постов (для ленты Home)
+// Route to get all posts (for the Home feed)
 router.get('/', getPosts)
 
-// Марш. создания поста. защита + загрузка одного файла с полем 'image'.
+// Route for creating a post. Protected and handles single file upload with field 'image'.
 router.post('/', protect, upload.single('image'), createPost)
 
-// Марш. удаления. DELETE, protect.
+// Route for deleting a post. DELETE, protected.
 router.delete('/:id', protect, deletePost)
 
-// Марш. для лайка/дизлайка. PUT.
+// Route for liking/unliking a post. PUT.
 router.put('/:id/like', protect, toggleLike)
 
-// Марш. для добавления комментария.
+// Route for adding a comment.
 router.post('/:id/comment', protect, addComment)
-// Марш. для удаления комментария. DELETE.
+// Route for deleting a comment. DELETE.
 router.delete('/:id/comment/:commentId', protect, deleteComment)
 
 export default router

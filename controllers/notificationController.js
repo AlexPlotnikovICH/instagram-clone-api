@@ -11,21 +11,20 @@ export const getNotifications = async (req, res) => {
     res.json(notifications)
   } catch (error) {
     console.error(error)
-    res.status(500).json({ message: 'Ошибка при получении уведомлений' })
+    res.status(500).json({ message: 'Error fetching notifications' })
   }
 }
 
-// НОВАЯ ФУНКЦИЯ: Сброс статуса (гасим красную точку)
+// Mark all notifications as read for the current user
 export const markAsRead = async (req, res) => {
   try {
-    // Находим все непрочитанные уведомления текущего юзера и ставим isRead: true
     await Notification.updateMany(
       { recipient: req.user._id, isRead: false },
       { $set: { isRead: true } },
     )
-    res.json({ message: 'Уведомления прочитаны' })
+    res.json({ message: 'Notifications marked as read' })
   } catch (error) {
-    console.error('Ошибка при сбросе уведомлений:', error)
-    res.status(500).json({ message: 'Ошибка при обновлении статуса' })
+    console.error('Error marking notifications as read:', error)
+    res.status(500).json({ message: 'Error updating notification status' })
   }
 }

@@ -1,18 +1,15 @@
 import Post from '../models/postModel.js'
 import Notification from '../models/notificationModel.js'
 
-// 1. СОЗДАНИЕ ПОСТА
+// Create a new post
 export const createPost = async (req, res) => {
   try {
     const { caption } = req.body
 
     if (!req.file) {
-      return res
-        .status(400)
-        .json({ message: 'Пожалуйста, прикрепите изображение' })
+ return res.status(400).json({ message: 'Please attach an image' })
     }
 
-    // Конвертация в Base64
     const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`
 
     const post = await Post.create({
@@ -23,12 +20,12 @@ export const createPost = async (req, res) => {
 
     res.status(201).json(post)
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: 'Ошибка сервера при создании поста' })
+ console.error(error)
+    res.status(500).json({ message: 'Server error while creating post' })
   }
 }
 
-// 2. ПОЛУЧЕНИЕ ВСЕХ ПОСТОВ (ЛЕНТА)
+// Get all posts (feed)
 export const getPosts = async (req, res) => {
   try {
     const posts = await Post.find()
@@ -37,11 +34,11 @@ export const getPosts = async (req, res) => {
       .populate('comments.user', 'username profile_image')
     res.json(posts)
   } catch (error) {
-    res.status(500).json({ message: 'Ошибка при получении постов' })
+    res.status(500).json({ message: 'Error fetching posts' })
   }
 }
 
-// 3. ПОЛУЧЕНИЕ ПОСТОВ КОНКРЕТНОГО ЮЗЕРА
+// Get posts for a specific user
 export const getUserPosts = async (req, res) => {
   try {
     const { userId } = req.params
@@ -52,47 +49,44 @@ export const getUserPosts = async (req, res) => {
 
     res.json(posts)
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: 'Ошибка при получении постов пользователя' })
+    res.status(500).json({ message: 'Error fetching user posts' })
   }
 }
 
-// 4. УДАЛЕНИЕ ПОСТА
+// Delete a post
 export const deletePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id)
 
     if (!post) {
-      return res.status(404).json({ message: 'Пост не найден' })
+      return res.status(404).json({ message: 'Post not found' })
     }
 
     if (post.user.toString() !== req.user._id.toString()) {
-      return res
-        .status(403)
-        .json({ message: 'Вы не можете удалить чужой пост' })
+      // Only the post owner can delete their post
+      return res.status(403).json({
+ message: 'You are not authorized to delete this post',
+      })
     }
 
-    // Удаляем все уведомления, связанные с этим постом
     await Notification.deleteMany({ post: post._id })
 
-    // А теперь удаляем сам пост
     await post.deleteOne()
 
-    res.json({ message: 'Пост и связанные уведомления удалены' })
+    res.json({ message: 'Post and associated notifications deleted' })
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: 'Ошибка сервера при удалении поста' })
+ console.error(error)
+    res.status(500).json({ message: 'Server error while deleting post' })
   }
 }
 
-// 5. ЛАЙК / ДИЗЛАЙК
+// Toggle like/unlike on a post
 export const toggleLike = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id)
 
     if (!post) {
-      return res.status(404).json({ message: 'Пост не найден' })
+      return res.status(404).json({ message: 'Post not found' })
     }
 
     const isLiked = post.likes.some(
@@ -126,20 +120,20 @@ export const toggleLike = async (req, res) => {
     await post.save()
     res.json(post.likes)
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: 'Ошибка сервера при обработке лайка' })
+ console.error(error)
+    res.status(500).json({ message: 'Server error while processing like' })
   }
 }
 
-// 6. ДОБАВЛЕНИЕ КОММЕНТАРИЯ
+// Add a comment to a post
 export const addComment = async (req, res) => {
   try {
     const { text } = req.body
     if (!text)
-      return res.status(400).json({ message: 'Текст комментария обязателен' })
+      return res.status(400).json({ message: 'Comment text is required' })
 
     const post = await Post.findById(req.params.id)
-    if (!post) return res.status(404).json({ message: 'Пост не найден' })
+    if (!post) return res.status(404).json({ message: 'Post not found' })
 
     const newComment = {
       user: req.user._id,
@@ -159,18 +153,16 @@ export const addComment = async (req, res) => {
 
     await post.save()
 
-    // Перед отправкой ответа подтягиваем данные юзера в только что созданном комменте
+    // Populate user data for the newly created comment before sending the response
     await post.populate('comments.user', 'username profile_image')
 
     res.status(201).json(post.comments)
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: 'Ошибка сервера при добавлении комментария' })
+    res.status(500).json({ message: 'Server error while adding comment' })
   }
 }
 
-// 7. РЕКОМЕНДАЦИИ (EXPLORE)
+// Get posts for the explore feed
 export const getExplorePosts = async (req, res) => {
   try {
     const posts = await Post.aggregate([{ $sample: { size: 20 } }])
@@ -182,42 +174,40 @@ export const getExplorePosts = async (req, res) => {
 
     res.json(populatedPosts)
   } catch (error) {
-    console.error(error)
-    res
-      .status(500)
-      .json({ message: 'Ошибка при формировании ленты рекомендаций' })
+ console.error(error)
+    res.status(500).json({ message: 'Error generating explore feed' })
   }
 }
-// 8. УДАЛЕНИЕ КОММЕНТАРИЯ
+// Delete a comment from a post
 export const deleteComment = async (req, res) => {
   try {
     const { id, commentId } = req.params
 
     const post = await Post.findById(id)
     if (!post) {
-      return res.status(404).json({ message: 'Пост не найден' })
+      return res.status(404).json({ message: 'Post not found' })
     }
 
     const comment = post.comments.find(c => c._id.toString() === commentId)
     if (!comment) {
-      return res.status(404).json({ message: 'Комментарий не найден' })
+      return res.status(404).json({ message: 'Comment not found' })
     }
 
-    // Проверка прав: ты должен быть либо автором коммента, либо автором поста
+    // Permission check: User must be either the comment author or the post author
     if (
       comment.user.toString() !== req.user._id.toString() &&
       post.user.toString() !== req.user._id.toString()
     ) {
-      return res
-        .status(403)
-        .json({ message: 'Нет прав на удаление комментария' })
+      return res.status(403).json({
+ message: 'You do not have permission to delete this comment',
+      })
     }
 
-    // Удаляем коммент из массива
+    // Remove the comment from the array
     post.comments = post.comments.filter(c => c._id.toString() !== commentId)
     await post.save()
 
-    //удаляем уведомление об этом комменте
+    // Delete the notification associated with this comment
     await Notification.findOneAndDelete({
       sender: comment.user,
       recipient: post.user,
@@ -225,11 +215,11 @@ export const deleteComment = async (req, res) => {
       post: id,
     })
 
-    // Возвращаем обновленный массив комментов
+    // Return the updated array of comments
     await post.populate('comments.user', 'username profile_image')
     res.json(post.comments)
   } catch (error) {
-    console.error('Ошибка удаления комментария:', error)
-    res.status(500).json({ message: 'Ошибка сервера при удалении комментария' })
+ console.error('Error deleting comment:', error)
+    res.status(500).json({ message: 'Server error while deleting comment' })
   }
 }

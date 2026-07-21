@@ -6,24 +6,24 @@ export const registerUser = async (req, res) => {
   try {
     const { email, username, fullname, password } = req.body
 
-    // 1. ЖЕСТКАЯ ВАЛИДАЦИЯ
+    // 1. Strict validation
     if (!email || !username || !fullname || !password) {
-      return res.status(400).json({ message: 'Пожалуйста, заполните все поля' })
+ return res.status(400).json({ message: 'Please fill in all fields' })
     }
 
-    // 2. ПРОВЕРКА НА ДУБЛИКАТЫ
+    // 2. Check for duplicates
     const userExists = await User.findOne({ $or: [{ email }, { username }] })
     if (userExists) {
       return res.status(400).json({
-        message: 'Пользователь с таким email или username уже существует',
+ message: 'User with this email or username already exists',
       })
     }
 
-    // 3. ХЭШИРОВАНИЕ ПАРОЛЯ
+    // 3. Password hashing
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
 
-    // 4. СОХРАНЕНИЕ В БАЗУ
+    // 4. Save to database
     const user = await User.create({
       fullname,
       username,
@@ -31,7 +31,7 @@ export const registerUser = async (req, res) => {
       password: hashedPassword,
     })
 
-    // 5. ОТВЕТ КЛИЕНТУ  Добавлен токен!
+    // 5. Respond to client with token
     res.status(201).json({
       _id: user._id,
       fullname: user.fullname,
@@ -43,7 +43,7 @@ export const registerUser = async (req, res) => {
     })
   } catch (error) {
     console.error(error)
-    res.status(500).json({ message: 'Ошибка сервера при регистрации' })
+    res.status(500).json({ message: 'Server error during registration' })
   }
 }
 
@@ -52,10 +52,10 @@ export const loginUser = async (req, res) => {
     const { email, password } = req.body
 
     if (!email || !password) {
-      return res.status(400).json({ message: 'Пожалуйста, заполните все поля' })
+ return res.status(400).json({ message: 'Please fill in all fields' })
     }
 
-    // Хотфикс от фронтенда: гибкий поиск
+    // Frontend hotfix: flexible search (allows login with email or username)
     const user = await User.findOne({
       $or: [{ email: email }, { username: email }],
     })
@@ -67,14 +67,14 @@ export const loginUser = async (req, res) => {
         username: user.username,
         email: user.email,
         bio: user.bio || '',
-        profile_image: user.profile_image || '', 
+        profile_image: user.profile_image || '',
         token: generateToken(user._id),
       })
     } else {
-      res.status(401).json({ message: 'Неверный email или пароль' })
+      res.status(401).json({ message: 'Invalid email or password' })
     }
   } catch (error) {
     console.error(error)
-    res.status(500).json({ message: 'Ошибка сервера при авторизации' })
+    res.status(500).json({ message: 'Server error during authentication' })
   }
 }

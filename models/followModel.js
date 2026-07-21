@@ -18,7 +18,7 @@ const followSchema = new mongoose.Schema(
   },
 )
 
-// Жесткая блокировка двойных подписок на уровне БД
+// Enforce unique follower-following pairs at the database level
 followSchema.index({ follower: 1, following: 1 }, { unique: true })
 
 export default mongoose.model('Follow', followSchema)

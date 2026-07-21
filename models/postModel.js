@@ -26,15 +26,15 @@ const postSchema = new mongoose.Schema(
         user: {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'User',
-          required: true, // Без автора коммент существовать не может
+          required: true,
         },
         text: {
           type: String,
-          required: true, // Пустые комменты не нужны
+          required: true,
         },
         createdAt: {
           type: Date,
-          default: Date.now, // Дата поставится сама в момент создания
+          default: Date.now,
         },
       },
     ],
