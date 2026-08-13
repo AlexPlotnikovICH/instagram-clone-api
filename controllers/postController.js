@@ -1,5 +1,6 @@
 import Post from '../models/postModel.js'
 import Notification from '../models/notificationModel.js'
+import { uploadToCloudinary } from '../utils/uploadToCloudinary.js'
 
 // Create a new post
 export const createPost = async (req, res) => {
@@ -7,20 +8,21 @@ export const createPost = async (req, res) => {
     const { caption } = req.body
 
     if (!req.file) {
- return res.status(400).json({ message: 'Please attach an image' })
+      return res.status(400).json({ message: 'Please attach an image' })
     }
 
-    const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`
+    // Upload image to Cloudinary and get the URL
+    const imageUrl = await uploadToCloudinary(req.file.buffer, 'posts')
 
     const post = await Post.create({
       user: req.user._id,
-      image: base64Image,
+      image: imageUrl,
       caption,
     })
 
     res.status(201).json(post)
   } catch (error) {
- console.error(error)
+    console.error(error)
     res.status(500).json({ message: 'Server error while creating post' })
   }
 }

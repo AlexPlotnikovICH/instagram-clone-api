@@ -1,6 +1,7 @@
 import User from '../models/userModel.js'
 import Follow from '../models/followModel.js'
 import Notification from '../models/notificationModel.js'
+import { uploadToCloudinary } from '../utils/uploadToCloudinary.js'
 
 export const searchUsers = async (req, res) => {
   try {
@@ -117,8 +118,8 @@ export const updateProfile = async (req, res) => {
         req.body.website !== undefined ? req.body.website : user.website
 
       if (req.file) {
-        const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`
-        user.profile_image = base64Image
+        const imageUrl = await uploadToCloudinary(req.file.buffer, 'avatars')
+        user.profile_image = imageUrl
       }
 
       const updatedUser = await user.save()
