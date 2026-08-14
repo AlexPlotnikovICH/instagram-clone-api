@@ -13,9 +13,30 @@ const app = express()
 connectDB()
 const PORT = process.env.PORT || 3333
 
+// Trust reverse proxy (Render)
 app.set('trust proxy', 1)
 
-app.use(cors())
+// Allowed origins for CORS
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  process.env.CLIENT_URL,
+].filter(Boolean)
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, Postman)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true)
+      } else {
+        callback(new Error('Not allowed by CORS'))
+      }
+    },
+    credentials: true,
+  })
+)
+
 app.use(express.json())
 
 app.use('/api/auth', authRoutes)
