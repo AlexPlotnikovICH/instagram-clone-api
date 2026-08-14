@@ -112,10 +112,13 @@ export const updateProfile = async (req, res) => {
     const user = await User.findById(req.user._id)
 
     if (user) {
+      if (user.isDemo) {
+        return res.status(403).json({ message: 'Profile updates are disabled for the demo account' })
+      }
+
       user.fullname = req.body.fullname || user.fullname
       user.bio = req.body.bio !== undefined ? req.body.bio : user.bio
-      user.website =
-        req.body.website !== undefined ? req.body.website : user.website
+      user.website = req.body.website !== undefined ? req.body.website : user.website
 
       if (req.file) {
         const imageUrl = await uploadToCloudinary(req.file.buffer, 'avatars')
@@ -141,22 +144,19 @@ export const updateProfile = async (req, res) => {
     res.status(500).json({ message: 'Error updating profile' })
   }
 }
-// Get public profile of any user by username
+
 export const getPublicProfile = async (req, res) => {
   try {
     const { username } = req.params
 
-    // 1. Find the user
     const user = await User.findOne({ username }).select('-password')
     if (!user) {
       return res.status(404).json({ message: 'User not found' })
     }
 
-    // 2. Count followers and following
     const followersCount = await Follow.countDocuments({ following: user._id })
     const followingCount = await Follow.countDocuments({ follower: user._id })
 
-    // 3. Check if the current user is following this user
     const isFollowing = await Follow.findOne({
       follower: req.user._id,
       following: user._id,

@@ -78,3 +78,42 @@ export const loginUser = async (req, res) => {
     res.status(500).json({ message: 'Server error during authentication' })
   }
 }
+export const demoLogin = async (req, res) => {
+  try {
+    const DEMO_EMAIL = 'demo@ichgram.com'
+    const DEMO_USERNAME = 'demo_user'
+
+    let user = await User.findOne({ email: DEMO_EMAIL })
+
+    if (!user) {
+      const salt = await bcrypt.genSalt(10)
+      const hashedPassword = await bcrypt.hash('DemoPassword123!', salt)
+
+      user = await User.create({
+        fullname: 'Demo Guest',
+        username: DEMO_USERNAME,
+        email: DEMO_EMAIL,
+        password: hashedPassword,
+        bio: '👋 Hey! I am a guest exploring ICHGRAM. Feel free to look around!',
+        profile_image: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80',
+        website: 'https://github.com',
+        isDemo: true,
+      })
+    }
+
+    res.json({
+      _id: user._id,
+      fullname: user.fullname,
+      username: user.username,
+      email: user.email,
+      bio: user.bio,
+      profile_image: user.profile_image,
+      website: user.website,
+      isDemo: user.isDemo,
+      token: generateToken(user._id),
+    })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: 'Server error during demo login' })
+  }
+}
