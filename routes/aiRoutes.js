@@ -30,7 +30,7 @@ router.post('/chat', async (req, res) => {
           content: message
         }
       ],
-      model: 'llama-3.1-8b-instant',
+      model: 'openai/gpt-oss-120b',
     })
 
     console.log('2. Response received from Groq!')
